@@ -20,7 +20,7 @@
 
 <script>
   import Slider from 'base/slider/slider'
-  import {getRecommend} from 'api/recommend'
+  import {getRecommend, getDiscList} from 'api/recommend'
   import {ERR_OK} from 'api/config'
   export default {
     name: 'Recommend',
@@ -34,6 +34,7 @@
     },
     created () {
       this._getRecommend()
+      this._getDiscList()
     },
     methods: {
       _getRecommend () {
@@ -41,6 +42,14 @@
           if (res.code === ERR_OK) {
             const data = res.data
             this.recommends = data.slider
+          }
+        })
+      },
+      _getDiscList () {
+        getDiscList().then((res) => {
+          if (res.code === ERR_OK) {
+            const data = res.data
+            console.log(data)
           }
         })
       }

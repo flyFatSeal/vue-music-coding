@@ -61,6 +61,7 @@
         }
         this._setSliderWidth(true)
       })
+      clearTimeout(this.timer)
     },
     methods: {
       _initDots() {
