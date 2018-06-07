@@ -12,7 +12,17 @@
       </div>
       <div class="recommend-list">
         <h1 class="list-title">热门歌单</h1>
-        <ul></ul>
+        <ul>
+          <li v-for="item of DiscList" class="item">
+            <div class="icon">
+              <img width="60" height="60" :src="item.imgurl">
+            </div>
+            <div class="text">
+              <h2 class="name" v-html="item.creator.name"></h2>
+              <p class="desc" v-html="item.dissname"></p>
+            </div>
+          </li>
+        </ul>
       </div>
     </div>
   </div>
@@ -29,7 +39,8 @@
     },
     data () {
       return {
-        recommends: []
+        recommends: [],
+        DiscList: []
       }
     },
     created () {
@@ -49,7 +60,7 @@
         getDiscList().then((res) => {
           if (res.code === ERR_OK) {
             const data = res.data
-            console.log(data)
+            this.DiscList = data.list
           }
         })
       }
