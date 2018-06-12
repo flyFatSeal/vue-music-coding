@@ -1,41 +1,45 @@
 <template>
   <div class="recommend" ref="recommend">
-    <div class="recommend-content">
-      <div v-if="recommends.length" class="slider-wrapper">
-        <slider>
-          <div v-for="item of recommends">
-            <a :href="item.linkUrl">
-              <img :src="item.picUrl" alt="">
-            </a>
-          </div> 
-        </slider>
+    <scroll ref="scroll" class="recommend-content" :data="DiscList">
+      <div>
+        <div v-if="recommends.length" class="slider-wrapper">
+          <slider>
+            <div v-for="item of recommends">
+              <a :href="item.linkUrl">
+                <img @load="imgLoad" :src="item.picUrl" alt="">
+              </a>
+            </div> 
+          </slider>
+        </div>
+        <div class="recommend-list">
+          <h1 class="list-title">热门歌单</h1>
+          <ul>
+            <li v-for="item of DiscList" class="item">
+              <div class="icon">
+                <img width="60" height="60" v-lazy="item.imgurl">
+              </div>
+              <div class="text">
+                <h2 class="name" v-html="item.creator.name"></h2>
+                <p class="desc" v-html="item.dissname"></p>
+              </div>
+            </li>
+          </ul>
+        </div>
       </div>
-      <div class="recommend-list">
-        <h1 class="list-title">热门歌单</h1>
-        <ul>
-          <li v-for="item of DiscList" class="item">
-            <div class="icon">
-              <img width="60" height="60" :src="item.imgurl">
-            </div>
-            <div class="text">
-              <h2 class="name" v-html="item.creator.name"></h2>
-              <p class="desc" v-html="item.dissname"></p>
-            </div>
-          </li>
-        </ul>
-      </div>
-    </div>
+    </scroll>
   </div>
 </template>
 
 <script>
+  import Scroll from 'base/scroll/scroll'
   import Slider from 'base/slider/slider'
   import {getRecommend, getDiscList} from 'api/recommend'
   import {ERR_OK} from 'api/config'
   export default {
     name: 'Recommend',
     components: {
-      Slider
+      Slider,
+      Scroll
     },
     data () {
       return {
@@ -63,6 +67,12 @@
             this.DiscList = data.list
           }
         })
+      },
+      imgLoad () {
+        if (!this.checkloaded) {
+          this.checkloaded = true
+          this.$refs.scroll.refresh()
+        }
       }
     }
   }
