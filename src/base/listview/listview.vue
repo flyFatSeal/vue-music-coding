@@ -86,6 +86,9 @@
       selectItem(item) {
         this.$emit('selected', item)
       },
+      refresh() {
+        this.$refs.listview.refresh()
+      },
       onShortTouchStart(e) {
         let anchorIndex = getData(e.target, 'index')
         let firstTouch = e.touches[0]
