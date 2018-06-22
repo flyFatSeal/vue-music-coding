@@ -44,16 +44,20 @@ export function getSongList(disstid) {
     utf8: 1,
     onlysong: 0,
     disstid,
-    format: 'jsonp',
+    format: 'json',
     g_tk: 5381,
-    jsonpCallback: 'playlistinfoCallback',
     loginUin: 0,
     hostUin: 0,
     inCharset: 'utf8',
     outCharset: 'utf-8',
     notice: 0,
     platform: 'yqq',
-    needNewCode: 0
+    needNewCode: 0,
+    picmid: 1,
+    nosign: 1,
+    song_begin: 0,
+    song_num: 20,
+    pic: 500
   })
   return axios.get(url, {
     params: data

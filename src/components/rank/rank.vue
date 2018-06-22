@@ -1,12 +1,63 @@
 <template>
   <div class="rank" ref="rank">
-    排行
+    <scroll class="toplist" :data="topList" ref="scroll">
+      <ul>
+        <li class="item" v-for="item in topList">
+          <div class="icon">
+            <img v-lazy="item.picUrl" width="100" height="100">
+          </div>
+          <ul class="songlist">
+            <li class="song" v-for="(song, index) in item.songList">
+              <span>{{index + 1}}.</span>
+              <span>{{song.songname}}-{{song.singername}}</span>
+            </li>
+          </ul>
+        </li>
+      </ul>
+      <div class="loading-container" v-show="!topList.length">
+        <loading></loading>
+      </div>
+    </scroll>
+    <router-view></router-view>
   </div>
 </template>
 
 <script>
+  import {getTopList} from 'api/rank'
+  import {ERR_OK} from 'api/config'
+  import Scroll from 'base/scroll/scroll'
+  import Loading from 'base/loading/loading'
+  import {playListMixin} from 'common/js/mixin'
+
   export default {
-    name: 'Rank'
+    mixins: [playListMixin],
+    components: {
+      Scroll,
+      Loading
+    },
+    name: 'Rank',
+    data() {
+      return {
+        topList: []
+      }
+    },
+    created() {
+      this._getTopList()
+    },
+    methods: {
+      handlePlayList(playList) {
+        const bottom = playList.length > 0 ? '60px' : ''
+        this.$refs.rank.style.bottom = bottom
+        this.$refs.scroll.refresh()
+      },
+      _getTopList() {
+        getTopList().then((res) => {
+          if (res.code === ERR_OK) {
+            this.topList = res.data.topList
+          }
+        })
+      }
+    }
   }
 </script>
 
