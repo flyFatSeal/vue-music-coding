@@ -1,12 +1,64 @@
 <template>
   <div class="search">
-    搜索
+    <div class="search-box-wrapper">
+      <search-box ref="searchBox" @query="onQueryChange"></search-box>
+    </div>
+    <div class="shortcut-wrapper" v-show="!query">
+      <div class="shortcut">
+        <div class="hot-key">
+          <h1 class="title">热门搜索</h1>
+          <ul>
+            <li @click="addQuery(item.k)" class="item" v-for="item in hotKey">
+              <span>{{item.k}}</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="search-result">
+      <suggest :query="query" v-show="query"></suggest>
+    </div>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
+  import SearchBox from 'base/search-box/search-box'
+  import {getHotKey} from 'api/search'
+  import {ERR_OK} from 'api/config'
+  import Suggest from 'components/suggest/suggest'
+
   export default {
-    name: 'search'
+    name: 'search',
+    created() {
+      this._getHotKey()
+    },
+    data() {
+      return {
+        hotKey: [],
+        query: ''
+      }
+    },
+    methods: {
+      _getHotKey() {
+        getHotKey().then((res) => {
+          if (res.code === ERR_OK) {
+            console.log(1)
+            this.hotKey = res.data.hotkey.slice(0, 10)
+          }
+        })
+      },
+      addQuery(query) {
+        console.log(2)
+        this.$refs.searchBox.setQuery(query)
+      },
+      onQueryChange(newQuery) {
+        this.query = newQuery
+      }
+    },
+    components: {
+      SearchBox,
+      Suggest
+    }
   }
 </script>
 
@@ -34,7 +86,7 @@
           .item
             display: inline-block
             padding: 5px 10px
-            margin: 0 20px 10px 0
+            margin: 0 15px 10px 0
             border-radius: 6px
             background: $color-highlight-background
             font-size: $font-size-medium
@@ -60,4 +112,6 @@
       width: 100%
       top: 178px
       bottom: 0
+      z-index: -1;
+
 </style>

@@ -8,11 +8,14 @@
   import MusicList from 'components/music-list/music-list'
   import {getMusicList} from 'api/rank'
   import {ERR_OK} from 'api/config'
-  import {mapGetters} from 'vuex'
   import {createSong} from 'common/js/song'
+  import {mapGetters} from 'vuex'
 
   export default {
     computed: {
+      ...mapGetters([
+        'topList'
+      ]),
       title() {
         return this.topList.topTitle
       },
@@ -21,10 +24,10 @@
           return this.songs[0].image
         }
         return ''
-      },
-      ...mapGetters([
-        'topList'
-      ])
+      }
+    },
+    components: {
+      MusicList
     },
     data() {
       return {
@@ -57,9 +60,6 @@
         })
         return ret
       }
-    },
-    components: {
-      MusicList
     }
   }
 </script>

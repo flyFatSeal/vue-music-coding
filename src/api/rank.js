@@ -23,7 +23,8 @@ export function getMusicList(topid) {
     tpl: 3,
     page: 'detail',
     type: 'top',
-    platform: 'h5'
+    platform: 'h5',
+    format: 'json'
   })
 
   return jsonp(url, data, options)
