@@ -42,13 +42,11 @@
       _getHotKey() {
         getHotKey().then((res) => {
           if (res.code === ERR_OK) {
-            console.log(1)
             this.hotKey = res.data.hotkey.slice(0, 10)
           }
         })
       },
       addQuery(query) {
-        console.log(2)
         this.$refs.searchBox.setQuery(query)
       },
       onQueryChange(newQuery) {
