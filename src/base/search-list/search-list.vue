@@ -1,13 +1,14 @@
 <template>
   <div class="search-list" v-show="searches.length">
-    <transition-group name="list" tag="ul">
-      <li :key="item" class="search-item" @click="selectItem(item)" v-for="item in searches">
+      <li  class="search-item"
+           v-for="item in searches"
+           @click="selectItem(item)"
+           >
         <span class="text">{{item}}</span>
         <span class="icon" @click.stop="deleteOne(item)">
           <i class="icon-delete"></i>
         </span>
       </li>
-    </transition-group>
   </div>
 </template>
 
@@ -24,7 +25,7 @@
         this.$emit('select', item)
       },
       deleteOne(item) {
-        this.$emit('delete', item)
+        this.$emit('deleteOne', item)
       }
     }
   }

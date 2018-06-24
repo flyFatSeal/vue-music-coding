@@ -112,7 +112,6 @@
   import Lyric from 'lyric-parser'
   import Scroll from 'base/scroll/scroll'
   import {playListMixin} from 'common/js/mixin'
-  // import {getLyric} from 'common/js/song'
 
   const transform = prefixStyle('transform')
   const transitionDuration = prefixStyle('transitionDuration')

@@ -3,11 +3,17 @@
     class="suggest" 
     :data="result"
     :pullup="pullup"
+    :beforeScroll="beforeScroll"
+    @beforeScroll="listScroll"
     @scrollToEnd="searchMore"
     ref="suggest"
     >
     <ul class="suggest-list">
-      <li  class="suggest-item" v-for="item in result">
+      <li  
+        class="suggest-item" 
+        v-for="item in result"
+        @click="selectItem(item)"
+        >
         <div class="icon">
           <i :class="getIConCls(item)"></i>
         </div>
@@ -17,6 +23,9 @@
       </li>
       <loading v-show="hasMore"></loading>
     </ul>
+    <div class="no-result-wrapper" v-show="!result.length && !hasMore ">
+      <no-result title="抱歉，还未收录该歌曲"></no-result>
+    </div>
   </Scroll>
 </template>
 
@@ -26,6 +35,9 @@
   import {createSong} from 'common/js/song'
   import Scroll from 'base/scroll/scroll'
   import Loading from 'base/loading/loading'
+  import Singer from 'common/js/singer'
+  import {mapMutations, mapActions} from 'vuex'
+  import NoResult from 'base/no-result/no-result'
 
   const TYPE_SINGER = 'singer'
   const perpage = 20
@@ -47,7 +59,8 @@
         result: [],
         pullup: true,
         hasMore: true,
-        showTime: this.showSinger
+        showTime: this.showSinger,
+        beforeScroll: true
       }
     },
     methods: {
@@ -75,6 +88,9 @@
             this._checkMore(res.data)
           }
         })
+      },
+      listScroll() {
+        this.$emit('listScroll')
       },
       _checkMore(data) {
         const song = data.song
@@ -114,11 +130,33 @@
           }
         })
         return ret
-      }
+      },
+      selectItem(item) {
+        if (item.type === TYPE_SINGER) {
+          const singer = new Singer({
+            id: item.singermid,
+            name: item.singername
+          })
+          this.$router.push({
+            path: `/search/${singer.id}`
+          })
+          this.setSinger(singer)
+        } else {
+          this.insertSong(item)
+        }
+        this.$emit('select')
+      },
+      ...mapMutations({
+        setSinger: 'SET_SINGER'
+      }),
+      ...mapActions([
+        'insertSong'
+      ])
     },
     components: {
       Scroll,
-      Loading
+      Loading,
+      NoResult
     },
     watch: {
       query() {
@@ -157,6 +195,6 @@
     .no-result-wrapper
       position: absolute
       width: 100%
-      top: 50%
+      top: 40%
       transform: translateY(-50%)
 </style>
