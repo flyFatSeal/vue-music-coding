@@ -93,10 +93,11 @@
           </progress-circle>
         </div>
         <div class="control">
-          <i class="icon-playlist"></i>
+          <i class="icon-playlist" @click.stop="showList"></i>
         </div>
       </div>
     </transition>
+    <playlist ref="playList"></playlist>
     <audio :src="currentSong.url" ref="audio" @canplay="ready" @error="error" @timeupdate="updateTime" @ended="end"></audio>
   </div>
 </template>
@@ -112,6 +113,7 @@
   import Lyric from 'lyric-parser'
   import Scroll from 'base/scroll/scroll'
   import {playListMixin} from 'common/js/mixin'
+  import playlist from 'components/playlist/playlist'
 
   const transform = prefixStyle('transform')
   const transitionDuration = prefixStyle('transitionDuration')
@@ -166,6 +168,9 @@
         const bottom = playList.length > 0 ? '60px' : ''
         this.$refs.lyricList.$el.style.bottom = bottom
         this.$refs.lyricList.refresh()
+      },
+      showList() {
+        this.$refs.playList.show()
       },
       ChangeMode() {
         const mode = (this.mode + 1) % 3
@@ -442,7 +447,8 @@
     components: {
       ProgressBar,
       ProgressCircle,
-      Scroll
+      Scroll,
+      playlist
     }
   }
 </script>

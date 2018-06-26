@@ -1,7 +1,7 @@
 <template>
   <transition name="list-fade">
-    <div class="playlist">
-      <div class="list-wrapper">
+    <div class="playlist" v-show="showFlag" @click="hide">
+      <div class="list-wrapper" @click.stop>
         <div class="list-header">
           <h1 class="title">
             <i class="icon" ></i>
@@ -11,13 +11,13 @@
             </span>
           </h1>
         </div>
-        <scroll class="list-content">
+        <scroll :data="sequenceList" class="list-content" ref="scroll">
           <transition-group ref="list" name="list" tag="ul">
-            <li class="item">
-              <i class="current" ></i>
-              <span class="text"></span>
+            <li class="item" v-for="(item, index) in sequenceList" :key="index">
+              <i class="current" :class="getCurrentIcon(item, index)"></i>
+              <span class="text">{{item.name}}</span>
               <span class="like">
-                <i></i>
+                <i class="icon-not-favorite"></i>
               </span>
               <span class="delete">
                 <i class="icon-delete"></i>
@@ -32,18 +32,51 @@
           </div>
         </div>
         <div class="list-close">
-          <span>关闭</span>
+          <span @click="hide">关闭</span>
         </div>
       </div>
       <confirm ref="confirm"></confirm>
-      <add-song ref="addSong"></add-song>
     </div>
   </transition>
 </template>
 
 <script>
+  import Scroll from 'base/scroll/scroll'
+  import Confirm from 'base/confirm/confirm'
+  import {mapGetters} from 'vuex'
   export default {
-    
+    data() {
+      return {
+        showFlag: false
+      }
+    },
+    methods: {
+      show() {
+        this.showFlag = true
+        setTimeout(() => {
+          this.$refs.scroll.refresh()
+        }, 20)
+      },
+      hide() {
+        this.showFlag = false
+      },
+      getCurrentIcon(item, index) {
+        if (item.id === this.currentSong.id) {
+          return 'icon-play'
+        }
+      }
+    },
+    computed: {
+      ...mapGetters([
+        'sequenceList',
+        'currentSong',
+        'currentIndex'
+      ])
+    },
+    components: {
+      Scroll,
+      Confirm
+    }
   }
 </script>
 
