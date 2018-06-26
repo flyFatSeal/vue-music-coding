@@ -151,7 +151,10 @@
       }),
       ...mapActions([
         'insertSong'
-      ])
+      ]),
+      refresh() {
+        this.$refs.suggest.refresh()
+      }
     },
     components: {
       Scroll,
