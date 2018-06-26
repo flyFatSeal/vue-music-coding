@@ -1,12 +1,12 @@
 <template>
   <transition name="confirm-fade">
-    <div class="confirm">
+    <div class="confirm" v-show="showFlag">
       <div class="confirm-wrapper">
         <div class="confirm-content">
-          <p class="text"></p>
+          <p class="text">{{text}}</p>
           <div class="operate">
-            <div  class="operate-btn left"></div>
-            <div class="operate-btn"></div>
+            <div  class="operate-btn left" @click.stop="cancel">{{cancelBtnText}}</div>
+            <div class="operate-btn" @click.stop="deleteHistory">{{confirmBtnText}}</div>
           </div>
         </div>
       </div>
@@ -16,6 +16,40 @@
 
 <script>
   export default {
+    props: {
+      text: {
+        type: String,
+        default: ''
+      },
+      confirmBtnText: {
+        type: String,
+        default: '确定'
+      },
+      cancelBtnText: {
+        type: String,
+        default: '取消'
+      }
+    },
+    data() {
+      return {
+        showFlag: false
+      }
+    },
+    methods: {
+      show() {
+        this.showFlag = true
+      },
+      hide() {
+        this.showFlag = false
+      },
+      cancel() {
+        this.showFlag = false
+      },
+      deleteHistory() {
+        this.$emit('deleteHistory')
+        this.showFlag = false
+      }
+    }
   }
 </script>
 

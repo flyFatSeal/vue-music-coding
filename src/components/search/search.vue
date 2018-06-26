@@ -18,7 +18,7 @@
             <h1 class="title">
               <span class="text">搜索历史</span>
               <span class="clear" 
-                  @click="clearSearchHistory">
+                  @click="showConfirm">
                 <i class="icon-clear"></i>
               </span>
             </h1>
@@ -40,6 +40,7 @@
         ref="suggest"
         ></suggest>
     </div>
+    <confirm ref="confirm" :text="text" confirmBtnText='清空' @deleteHistory="clearSearchHistory"></confirm>
     <router-view></router-view>
   </div>
 </template>
@@ -53,6 +54,7 @@
   import SearchList from 'base/search-list/search-list'
   import Scroll from 'base/scroll/scroll'
   import {playListMixin} from 'common/js/mixin'
+  import Confirm from 'base/confirm/confirm'
 
   export default {
     mixins: [playListMixin],
@@ -63,7 +65,8 @@
     data() {
       return {
         hotKey: [],
-        query: ''
+        query: '',
+        text: '是否清空所有搜索历史'
       }
     },
     methods: {
@@ -80,6 +83,9 @@
             this.hotKey = res.data.hotkey.slice(0, 10)
           }
         })
+      },
+      showConfirm() {
+        this.$refs.confirm.show()
       },
       addQuery(query) {
         this.$refs.searchBox.setQuery(query)
@@ -111,7 +117,8 @@
       SearchBox,
       Suggest,
       SearchList,
-      Scroll
+      Scroll,
+      Confirm
     },
     watch: {
       query(newQuery) {
