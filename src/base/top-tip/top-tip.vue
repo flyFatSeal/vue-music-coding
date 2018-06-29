@@ -16,7 +16,8 @@
     },
     data() {
       return {
-        showFlag: false
+        showFlag: false,
+        timer: null
       }
     },
     methods: {

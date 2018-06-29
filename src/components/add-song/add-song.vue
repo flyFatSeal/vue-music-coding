@@ -2,38 +2,44 @@
   <transition name="slide">
     <div class="add-song" v-show="showFlag" @click.stop>
       <div class="header">
-        <h1 class="title">添加歌曲到列表</h1>
-        <div class="close" @click="hide">
+        <h1 class="title">添加歌曲列表</h1>
+        <div class="close" @click.stop="hide">
           <i class="icon-close"></i>
         </div>
       </div>
       <div class="search-box-wrapper">
-        <search-box ref="searchBox" @query="onQueryChange" placeholder="搜索歌曲"></search-box>
+        <search-box ref="searchBox" @query="onQueryChange"></search-box>
       </div>
       <div class="shortcut" v-show="!query">
-        <switches :switches="switches" :currentIndex="currentIndex" @switch="switchItem"></switches>
+        <switches :switches="switches" @switch="ChangeTab" :currentIndex="currentIndex"></switches>
         <div class="list-wrapper">
-          <scroll ref="songList" v-if="currentIndex===0" class="list-scroll" :data="playHistory">
+          <scroll ref="songList" class="list-scroll" v-if="currentIndex === 0":data="playHistory">
             <div class="list-inner">
-              <song-list :songs="playHistory" @select="selectSong">
-              </song-list>
+              <song-list :songs="playHistory" @select="SelectSong"></song-list>
             </div>
           </scroll>
-          <scroll :refreshDelay="refreshDelay" ref="searchList" v-if="currentIndex===1" class="list-scroll"
-                  :data="searchHistory">
+          <scroll ref="searchList" class="list-scroll" v-if="currentIndex === 1":data="searchHistory">
             <div class="list-inner">
-              <search-list @delete="deleteSearchHistory" @select="addQuery" :searches="searchHistory"></search-list>
+              <search-list 
+              :searches="searchHistory"
+              @select="addQuery"
+              @deleteOne="deleteSearchHistory"
+              ></search-list>
             </div>
           </scroll>
         </div>
       </div>
-      <div class="search-result" v-show="query">
-        <suggest :query="query" :showSinger="showSinger" @select="selectSuggest" @listScroll="blurInput"></suggest>
+      <div class="search-result" v-show="query"> 
+        <suggest :query="query" 
+                 :showSinger="showSinger"
+                 @select="saveSearch"
+                 @listScroll="blurInput"
+                 ></suggest> 
       </div>
-      <top-tip ref="topTip">
+      <top-tip ref="showTop">
         <div class="tip-title">
           <i class="icon-ok"></i>
-          <span class="text">1首歌曲已经添加到播放列表</span>
+          <span class="text">1首歌曲已添加到播放列表</span>
         </div>
       </top-tip>
     </div>
@@ -42,37 +48,32 @@
 
 <script type="text/ecmascript-6">
   import SearchBox from 'base/search-box/search-box'
-  import SongList from 'base/song-list/song-list'
-  import SearchList from 'base/search-list/search-list'
-  import Scroll from 'base/scroll/scroll'
-  import Switches from 'base/switches/switches'
-  import TopTip from 'base/top-tip/top-tip'
   import Suggest from 'components/suggest/suggest'
-  import {searchMixin} from 'common/js/mixin'
+  import {SearchMixin} from 'common/js/mixin'
+  import Switches from 'base/switches/switches'
+  import Scroll from 'base/scroll/scroll'
+  import SongList from 'base/song-list/song-list'
   import {mapGetters, mapActions} from 'vuex'
   import Song from 'common/js/song'
-
+  import SearchList from 'base/search-list/search-list'
+  import TopTip from 'base/top-tip/top-tip'
   export default {
-    mixins: [searchMixin],
+    mixins: [SearchMixin],
     data() {
       return {
         showFlag: false,
         showSinger: false,
-        currentIndex: 0,
-        songs: [],
         switches: [
-          {
-            name: '最近播放'
-          },
-          {
-            name: '搜索历史'
-          }
-        ]
+          {name: '最近播放'},
+          {name: '搜索历史'}
+        ],
+        currentIndex: 0
       }
     },
     computed: {
       ...mapGetters([
-        'playHistory'
+        'playHistory',
+        'searchHistory'
       ])
     },
     methods: {
@@ -89,18 +90,22 @@
       hide() {
         this.showFlag = false
       },
-      selectSong(song, index) {
-        if (index !== 0) {
-          this.insertSong(new Song(song))
-          this.$refs.topTip.show()
-        }
+      showTopTip() {
+        this.$refs.showTop.show()
       },
-      selectSuggest() {
-        this.$refs.topTip.show()
-        this.saveSearch()
+      saveSearch() {
+        this.saveSearchHistory(this.query)
+        this.showTopTip()
       },
-      switchItem(index) {
+      ChangeTab(index) {
         this.currentIndex = index
+      },
+      SelectSong(song, index) {
+        if (index === 0) {
+          return
+        }
+        this.insertSong(new Song(song))
+        this.showTopTip()
       },
       ...mapActions([
         'insertSong'
@@ -108,12 +113,12 @@
     },
     components: {
       SearchBox,
+      Suggest,
+      Switches,
+      Scroll,
       SongList,
       SearchList,
-      Scroll,
-      Switches,
-      TopTip,
-      Suggest
+      TopTip
     }
   }
 </script>

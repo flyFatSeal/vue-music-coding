@@ -34,9 +34,11 @@
     },
     methods: {
       _getSongList() {
+        if (!this.disc.dissid) {
+          this.$router.push('/recommend')
+        }
         getSongList(this.disc.dissid).then((res) => {
           if (res.code === ERR_OK) {
-            console.log(res.cdlist[0].songlist)
             this.songs = this._normalizeSongs(res.cdlist[0].songlist)
           }
         })
@@ -45,7 +47,6 @@
         let ret = []
         list.forEach((item) => {
           const musicData = item
-          console.log(musicData)
           if (musicData.songid && musicData.albummid) {
             ret.push(createSong(musicData))
           }

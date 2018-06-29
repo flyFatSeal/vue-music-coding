@@ -40,7 +40,7 @@
         ref="suggest"
         ></suggest>
     </div>
-    <confirm ref="confirm" :text="text" confirmBtnText='清空' @deleteHistory="clearSearchHistory"></confirm>
+    <confirm ref="confirm" :text="text" confirmBtnText='清空' @determine="clearSearchHistory"></confirm>
     <router-view></router-view>
   </div>
 </template>
@@ -50,14 +50,14 @@
   import {getHotKey} from 'api/search'
   import {ERR_OK} from 'api/config'
   import Suggest from 'components/suggest/suggest'
-  import {mapActions, mapGetters} from 'vuex'
+  import {mapActions} from 'vuex'
   import SearchList from 'base/search-list/search-list'
   import Scroll from 'base/scroll/scroll'
-  import {playListMixin} from 'common/js/mixin'
+  import {playListMixin, SearchMixin} from 'common/js/mixin'
   import Confirm from 'base/confirm/confirm'
 
   export default {
-    mixins: [playListMixin],
+    mixins: [playListMixin, SearchMixin],
     name: 'search',
     created() {
       this._getHotKey()
@@ -65,7 +65,6 @@
     data() {
       return {
         hotKey: [],
-        query: '',
         text: '是否清空所有搜索历史'
       }
     },
@@ -87,28 +86,11 @@
       showConfirm() {
         this.$refs.confirm.show()
       },
-      addQuery(query) {
-        this.$refs.searchBox.setQuery(query)
-      },
-      onQueryChange(newQuery) {
-        this.query = newQuery
-      },
-      blurInput() {
-        this.$refs.searchBox.blur()
-      },
-      saveSearch() {
-        this.saveSearchHistory(this.query)
-      },
       ...mapActions([
-        'saveSearchHistory',
-        'deleteSearchHistory',
         'clearSearchHistory'
       ])
     },
     computed: {
-      ...mapGetters([
-        'searchHistory'
-      ]),
       shortcut() {
         return this.hotKey.concat(this.searchHistory)
       }

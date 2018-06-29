@@ -6,7 +6,7 @@
           <p class="text">{{text}}</p>
           <div class="operate">
             <div  class="operate-btn left" @click.stop="cancel">{{cancelBtnText}}</div>
-            <div class="operate-btn" @click.stop="deleteHistory">{{confirmBtnText}}</div>
+            <div class="operate-btn" @click.stop="determine">{{confirmBtnText}}</div>
           </div>
         </div>
       </div>
@@ -45,8 +45,8 @@
       cancel() {
         this.showFlag = false
       },
-      deleteHistory() {
-        this.$emit('deleteHistory')
+      determine() {
+        this.$emit('determine')
         this.showFlag = false
       }
     }
