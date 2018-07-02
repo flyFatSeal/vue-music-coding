@@ -37,10 +37,10 @@
   import NoResult from 'base/no-result/no-result'
   import Song from 'common/js/song'
   import {mapGetters, mapActions} from 'vuex'
-  import {playlistMixin} from 'common/js/mixin'
+  import {playListMixin} from 'common/js/mixin'
 
   export default {
-    mixins: [playlistMixin],
+    mixins: [playListMixin],
     data() {
       return {
         currentIndex: 0,
@@ -75,7 +75,7 @@
       ])
     },
     methods: {
-      handlePlaylist(playlist) {
+      handlePlayList(playlist) {
         const bottom = playlist.length > 0 ? '60px' : ''
         this.$refs.listWrapper.style.bottom = bottom
         this.$refs.favoriteList && this.$refs.favoriteList.refresh()
