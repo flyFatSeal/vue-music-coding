@@ -46,5 +46,5 @@
         stroke: $color-theme-d
       &.progress-bar
         transform: scale(0.9) rotate(-90deg)
-        stroke: $color-theme
+        stroke: $color-bar
 </style>

@@ -11,7 +11,11 @@
             </div> 
           </slider>
         </div>
-        <div class="recommend-list">
+        <div class="recommend-list"
+             @touchstart.prevent="middleTouchStart"
+             @touchmove.prevent="middleTouchMove"
+             @touchend="middleTouchEnd"
+        >
           <h1 class="list-title">热门歌单</h1>
           <ul>
             <li @click="selectItem(item)" v-for="item of DiscList" class="item">

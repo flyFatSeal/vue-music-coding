@@ -24,6 +24,7 @@
     text-align: center
     color: $color-theme
     font-size: 0
+    background: $color-background-header-buttom
     .icon
       display: inline-block
       vertical-align: top

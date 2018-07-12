@@ -27,6 +27,8 @@
     height: 44px
     line-height: 44px
     font-size: $font-size-medium
+    border-style:solid
+    background: $color-background-header-buttom
     .tab-item
       flex: 1
       text-align: center

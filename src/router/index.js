@@ -51,55 +51,68 @@ const UserCenter = (resolve) => {
   })
 }
 
+const pageTransition = (resolve) => {
+  import('base/pageTransition/pageTransition').then((module) => {
+    resolve(module)
+  })
+}
+
+Router.prototype.goBack = function () {
+  this.isBack = true
+  window.history.go(-1)
+}
+
 export default new Router({
   routes: [
     {
       path: '/',
-      redirect: '/recommend'
-    },
-    {
-      path: '/rank',
-      component: Rank,
-      children: [
-        {
-          path: ':id',
-          component: TopList
-        }
+      name: 'pageTransition',
+      component: pageTransition,
+      children: [{
+        path: '/recommend',
+        component: Recommend,
+        children: [
+          {
+            path: ':id',
+            component: Disc
+          }
+        ]
+      },
+      {
+        path: '/rank',
+        component: Rank,
+        children: [
+          {
+            path: ':id',
+            component: TopList
+          }
+        ]
+      },
+      {
+        path: '/singer',
+        component: Singer,
+        children: [
+          {
+            path: ':id',
+            component: SingerDetail
+          }
+        ]
+      },
+      {
+        path: '/search',
+        component: Search,
+        children: [
+          {
+            path: ':id',
+            component: SingerDetail
+          }
+        ]
+      },
+      {
+        path: '/user',
+        component: UserCenter
+      }
       ]
-    },
-    {
-      path: '/recommend',
-      component: Recommend,
-      children: [
-        {
-          path: ':id',
-          component: Disc
-        }
-      ]
-    },
-    {
-      path: '/singer',
-      component: Singer,
-      children: [
-        {
-          path: ':id',
-          component: SingerDetail
-        }
-      ]
-    },
-    {
-      path: '/search',
-      component: Search,
-      children: [
-        {
-          path: ':id',
-          component: SingerDetail
-        }
-      ]
-    },
-    {
-      path: '/user',
-      component: UserCenter
     }
   ]
 })

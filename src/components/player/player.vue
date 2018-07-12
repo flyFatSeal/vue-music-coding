@@ -16,6 +16,17 @@
           </div>
           <h1 class="title" v-html="currentSong.name"></h1>
           <h2 class="subtitle" v-html="currentSong.singer"></h2>
+          <div class="brLyric" v-show="showActiveLyric" ref="brLyric">  
+            <div class="playHr">
+              <img src="./play.png" height="100%" width="100%">
+            </div>
+            <div class="hrCenter">
+              <hr/>
+            </div>
+            <div class="hrTime">
+              {{format(this.currentTime)}}
+            </div>
+          </div>
         </div>
         <div class="middle"
              @touchstart.prevent="middleTouchStart"
@@ -23,7 +34,7 @@
              @touchend="middleTouchEnd"
         >
           <div class="middle-l" ref="middleL">
-            <div class="cd-wrapper" ref="cdWrapper">
+            <div class="cd-wrapper" ref="cdWrapper" @click.stop="clickCd">
               <div class="cd" :class="cdCls">
                 <img class="image" :src="currentSong.image">
               </div>
@@ -32,12 +43,18 @@
               <div class="playing-lyric">{{playingLyric}}</div>
             </div>
           </div>
-          <scroll class="middle-r" ref="lyricList" :data="currentLyric && currentLyric.lines">
+          <scroll class="middle-r" 
+                  ref="lyricList" 
+                  :data="currentLyric && currentLyric.lines"
+                  :probe-type="probeType"
+                  :listen-scroll="listenScroll"
+                  @scroll="LyricTouchStart"
+                  >
             <div class="lyric-wrapper">
               <div v-if="currentLyric">
                 <p ref="lyricLine"
                    class="text"
-                   :class="{'current': currentLineNum === index}"
+                   :class="{'current': currentLineNum === index || showSubActiveLyric}"
                    v-for="(line,index) in currentLyric.lines"
                 >
                   {{line.txt}}
@@ -116,6 +133,7 @@
 
   const transform = prefixStyle('transform')
   const transitionDuration = prefixStyle('transitionDuration')
+  const time = 300
 
   export default {
     mixins: [playListMixin, playerMixin],
@@ -127,7 +145,13 @@
         currentLyric: null,
         currentLineNum: 0,
         currentShow: 'cd',
-        playingLyric: null
+        playingLyric: null,
+        showActiveLyric: false,
+        listenScroll: true,
+        probeType: 3,
+        handleScroll: false,
+        setCurrentTop: 240,
+        showSubActiveLyric: false
       }
     },
     computed: {
@@ -159,6 +183,18 @@
         const bottom = playList.length > 0 ? '60px' : ''
         this.$refs.lyricList.$el.style.bottom = bottom
         this.$refs.lyricList.refresh()
+      },
+      LyricTouchStart(pos) {
+        const rect = this.$refs.brLyric.getBoundingClientRect().top
+        console.log('brLyricTop', rect)
+        console.log(pos)
+        this.showActiveLyric = true
+      },
+      LyricTouchMove() {
+
+      },
+      LyricTouchEnd() {
+
       },
       showList() {
         this.$refs.playList.show()
@@ -313,6 +349,7 @@
             return
           }
           this.currentLyric = new Lyric(lyric, this.handleLyric)
+          console.log(this.currentLyric)
           if (this.playing) {
             this.currentLyric.play()
           }
@@ -323,12 +360,14 @@
         })
       },
       handleLyric({lineNum, txt}) {
-        this.currentLineNum = lineNum
-        if (lineNum > 5) {
-          let lineEl = this.$refs.lyricLine[lineNum - 5]
-          this.$refs.lyricList.scrollToElement(lineEl, 1000)
-        } else {
-          this.$refs.lyricList.scrollTo(0, 0, 1000)
+        if (!this.handleScroll) {
+          this.currentLineNum = lineNum
+          if (lineNum > 5) {
+            let lineEl = this.$refs.lyricLine[lineNum - 5]
+            this.$refs.lyricList.scrollToElement(lineEl, 1000)
+          } else {
+            this.$refs.lyricList.scrollTo(0, 0, 1000)
+          }
         }
         this.playingLyric = txt
       },
@@ -337,6 +376,7 @@
         const touch = e.touches[0]
         this.touch.startX = touch.pageX
         this.touch.startY = touch.pageY
+        this.touch.percent = 0
       },
       middleTouchMove(e) {
         if (!this.touch.initiated) {
@@ -360,7 +400,7 @@
         let offsetWidth
         let opacity
         if (this.currentShow === 'cd') {
-          if (this.touch.percent > 0.1) {
+          if (this.touch.percent > 0.2) {
             offsetWidth = -window.innerWidth
             opacity = 0
             this.currentShow = 'lyric'
@@ -369,7 +409,7 @@
             opacity = 1
           }
         } else {
-          if (this.touch.percent < 0.9) {
+          if (this.touch.percent < 0.8 && this.touch.percent !== 0) {
             offsetWidth = 0
             this.currentShow = 'cd'
             opacity = 1
@@ -378,11 +418,20 @@
             opacity = 0
           }
         }
-        const time = 300
         this.$refs.lyricList.$el.style[transform] = `translate3d(${offsetWidth}px, 0, 0)`
         this.$refs.lyricList.$el.style[transitionDuration] = `${time}ms`
         this.$refs.middleL.style.opacity = opacity
         this.$refs.middleL.style[transitionDuration] = `${time}ms`
+      },
+      clickCd() {
+        if (this.currentShow === 'cd') {
+          this.currentShow = 'lyric'
+          let offsetWidth = -window.innerWidth
+          this.$refs.lyricList.$el.style[transform] = `translate3d(${offsetWidth}px, 0, 0)`
+          this.$refs.lyricList.$el.style[transitionDuration] = `${time}ms`
+          this.$refs.middleL.style.opacity = 0
+          this.$refs.middleL.style[transitionDuration] = `${time}ms`
+        }
       },
       togglePlaying() {
         if (!this.songReady) {
@@ -458,8 +507,27 @@
         opacity: 0.6
         filter: blur(20px)
       .top
-        position: relative
         margin-bottom: 25px
+        .brLyric
+          position: absolute
+          display: flex
+          flex-direction: row
+          justify-content: space-around
+          width: 375px
+          height: 25px
+          top: 36.5%
+          .playHr
+            width: 30px
+            height: 25px
+          .hrCenter
+            width: 255px
+            align-self: center
+          .hrTime
+            width: 40px
+            height: 25px
+            line-height:25px
+            font-size: 12px
+            color:rgba(213, 208, 208, 0.7)
         .back
           position absolute
           top: 0
@@ -548,7 +616,7 @@
               color: $color-text-l
               font-size: $font-size-medium
               &.current
-                color: $color-text
+                color: $color-background-header-buttom
       .bottom
         position: absolute
         bottom: 50px
@@ -662,7 +730,7 @@
         width: 30px
         padding: 0 10px
         .icon-play-mini, .icon-pause-mini, .icon-playlist
-          font-size: 30px
+          font-size: 28px
           color: $color-theme-d
         .icon-mini
           font-size: 32px

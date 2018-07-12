@@ -86,11 +86,11 @@
       position: relative
       top: 13px
       height: 4px
-      background: rgba(0, 0, 0, 0.3)
+      background: rgba(255, 255, 255, 0.2)
       .progress
         position: absolute
         height: 100%
-        background: $color-theme
+        background: rgba(194, 12, 12, 0.6)
       .progress-btn-wrapper
         position: absolute
         left: -8px

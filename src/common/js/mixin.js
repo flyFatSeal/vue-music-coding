@@ -1,6 +1,7 @@
 import {mapGetters, mapMutations, mapActions} from 'vuex'
 import {playMode} from 'common/js/config'
 import {shuffle} from 'common/js/util'
+import {prefixStyle} from 'common/js/dom'
 
 export const playListMixin = {
   computed: {
@@ -14,6 +15,9 @@ export const playListMixin = {
   activated() {
     this.handlePlayList(this.playList)
   },
+  created() {
+    this.touch = {}
+  },
   watch: {
     playList(newVal) {
       this.handlePlayList(newVal)
@@ -22,6 +26,39 @@ export const playListMixin = {
   methods: {
     handlePlayList() {
       throw new Error('component must implement handlePlayList method')
+    },
+    middleTouchStart(e) {
+      this.touch.initiated = true
+      const touch = e.touches[0]
+      this.touch.startX = touch.pageX
+      this.touch.startY = touch.pageY
+    },
+    middleTouchMove(e) {
+      const transform = prefixStyle('transform')
+      if (!this.touch.initiated) {
+        return
+      }
+      const touch = e.touches[0]
+      const deltaX = this.touch.startX - touch.pageX
+      const deltaY = this.touch.startY - touch.pageY
+      if (Math.abs(deltaY) > Math.abs(deltaX)) {
+        return
+      }
+      const offsetWidth = Math.max(0, deltaX)
+      const translateX = Math.min(150, -deltaX)
+      this.touch.percent = Math.abs(offsetWidth / window.innerWidth)
+      this.$refs.recommend.style[transform] = `translateX(${translateX}px)`
+    },
+    middleTouchEnd(e) {
+      const transform = prefixStyle('transform')
+      console.log(this.touch.percent)
+      this.$refs.recommend.style[transform] = `none`
+      if (this.touch.percent > 0.15) {
+        this.touch.percent = 0
+        this.$router.push({
+          path: `/singer`
+        })
+      }
     }
   }
 }
