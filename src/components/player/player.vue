@@ -48,13 +48,15 @@
                   :data="currentLyric && currentLyric.lines"
                   :probe-type="probeType"
                   :listen-scroll="listenScroll"
+                  :touch-start="touchStart"
                   @scroll="LyricTouchStart"
+                  @scrollStart="LyricStart"
                   >
             <div class="lyric-wrapper">
               <div v-if="currentLyric">
                 <p ref="lyricLine"
                    class="text"
-                   :class="{'current': currentLineNum === index || showSubActiveLyric}"
+                   :class="{'current': currentLineNum === index || showSubActiveLyric === index}"
                    v-for="(line,index) in currentLyric.lines"
                 >
                   {{line.txt}}
@@ -149,9 +151,12 @@
         showActiveLyric: false,
         listenScroll: true,
         probeType: 3,
+        touchStart: true,
         handleScroll: false,
         setCurrentTop: 240,
-        showSubActiveLyric: false
+        showSubActiveLyric: null,
+        LyricLines: 0,
+        playSubLineTop: 0
       }
     },
     computed: {
@@ -184,10 +189,21 @@
         this.$refs.lyricList.$el.style.bottom = bottom
         this.$refs.lyricList.refresh()
       },
+      LyricStart() {
+        console.log('touch')
+      },
       LyricTouchStart(pos) {
-        const rect = this.$refs.brLyric.getBoundingClientRect().top
-        console.log('brLyricTop', rect)
-        console.log(pos)
+        this.playSubLineTop = this.$refs.brLyric.getBoundingClientRect().top
+        if (this.LyricLines.length) {
+          let len = this.LyricLines.length
+          for (let i = 0; i < len; i++) {
+            let lineTop = Math.floor(this.$refs.lyricLine[i].getBoundingClientRect().top)
+            if (lineTop >= (this.setCurrentTop - 16) && lineTop <= (this.setCurrentTop + 16)) {
+              this.showSubActiveLyric = i
+              break
+            }
+          }
+        }
         this.showActiveLyric = true
       },
       LyricTouchMove() {
@@ -350,6 +366,7 @@
           }
           this.currentLyric = new Lyric(lyric, this.handleLyric)
           console.log(this.currentLyric)
+          this.LyricLines = this.currentLyric.lines
           if (this.playing) {
             this.currentLyric.play()
           }

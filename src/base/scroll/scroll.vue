@@ -36,6 +36,10 @@
       refreshDelay: {
         type: Number,
         default: 100
+      },
+      touchStart: {
+        type: Boolean,
+        default: false
       }
     },
     mounted () {
@@ -56,6 +60,15 @@
           let me = this
           this.scroll.on('scroll', (pos) => {
             me.$emit('scroll', pos)
+          })
+        }
+
+        if (this.touchStart) {
+          this.scroll.on('scrollStart', () => {
+            if (this.scroll.y <= (this.scroll.maxScrollY + 50)) {
+              this.$emit('scrollStart')
+              console.log('start')
+            }
           })
         }
 
