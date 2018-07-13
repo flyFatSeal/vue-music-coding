@@ -16,15 +16,15 @@
           </div>
           <h1 class="title" v-html="currentSong.name"></h1>
           <h2 class="subtitle" v-html="currentSong.singer"></h2>
-          <div class="brLyric" v-show="showActiveLyric" ref="brLyric">  
-            <div class="playHr">
+          <div class="brLyric" v-show="handleScroll" ref="brLyric">  
+            <div class="playHr" @click.stop="playSubTime">
               <img src="./play.png" height="100%" width="100%">
             </div>
             <div class="hrCenter">
               <hr/>
             </div>
             <div class="hrTime">
-              {{format(this.currentTime)}}
+              {{format(this.LyricSubTime)}}
             </div>
           </div>
         </div>
@@ -50,13 +50,12 @@
                   :listen-scroll="listenScroll"
                   :touch-start="touchStart"
                   @scroll="LyricTouchStart"
-                  @scrollStart="LyricStart"
                   >
             <div class="lyric-wrapper">
               <div v-if="currentLyric">
                 <p ref="lyricLine"
                    class="text"
-                   :class="{'current': currentLineNum === index || showSubActiveLyric === index}"
+                   :class="{'current': currentLineNum === index, 'current-sub': showSubActiveLyric === index && handleScroll}"
                    v-for="(line,index) in currentLyric.lines"
                 >
                   {{line.txt}}
@@ -132,6 +131,7 @@
   import Scroll from 'base/scroll/scroll'
   import {playListMixin, playerMixin} from 'common/js/mixin'
   import playlist from 'components/playlist/playlist'
+  import {debounce} from 'common/js/util'
 
   const transform = prefixStyle('transform')
   const transitionDuration = prefixStyle('transitionDuration')
@@ -156,7 +156,13 @@
         setCurrentTop: 240,
         showSubActiveLyric: null,
         LyricLines: 0,
-        playSubLineTop: 0
+        playSubLineTop: 0,
+        LyricSubTime: null,
+        scrollToSub: false,
+        scrollHandle: false,
+        Pagepos: 0,
+        changePos: 0,
+        autoPos: 0
       }
     },
     computed: {
@@ -183,34 +189,51 @@
     created() {
       this.touch = {}
     },
+    mounted() {
+      this.watchPagepos()
+      console.log('changePos', this.changePos, this.Pagepos)
+    },
     methods: {
+      test() {
+        console.log('test')
+      },
+      watchPagepos() {
+        this.$watch('autoPos', debounce(() => {
+          this.handleScroll = false
+        }, 1500))
+        setInterval(() => {
+          this.handleScroll = false
+          this.changePos = this.Pagepos
+        }, 1000)
+      },
       handlePlayList(playList) {
         const bottom = playList.length > 0 ? '60px' : ''
         this.$refs.lyricList.$el.style.bottom = bottom
         this.$refs.lyricList.refresh()
       },
-      LyricStart() {
-        console.log('touch')
+      playSubTime() {
+        console.log(this.currentSong.duration)
+        console.log(this.LyricSubTime)
+        let percent = (this.LyricSubTime + 2) / this.currentSong.duration
+        console.log('play', percent)
+        this.onProgressBarChange(percent)
       },
       LyricTouchStart(pos) {
+        this.Pagepos = pos.y
         this.playSubLineTop = this.$refs.brLyric.getBoundingClientRect().top
         if (this.LyricLines.length) {
           let len = this.LyricLines.length
           for (let i = 0; i < len; i++) {
+            this.scrollToSub = false
             let lineTop = Math.floor(this.$refs.lyricLine[i].getBoundingClientRect().top)
             if (lineTop >= (this.setCurrentTop - 16) && lineTop <= (this.setCurrentTop + 16)) {
               this.showSubActiveLyric = i
+              this.LyricSubTime = Math.floor(this.LyricLines[i].time / 1000)
               break
             }
           }
         }
         this.showActiveLyric = true
-      },
-      LyricTouchMove() {
-
-      },
-      LyricTouchEnd() {
-
       },
       showList() {
         this.$refs.playList.show()
@@ -377,14 +400,18 @@
         })
       },
       handleLyric({lineNum, txt}) {
-        if (!this.handleScroll) {
-          this.currentLineNum = lineNum
-          if (lineNum > 5) {
-            let lineEl = this.$refs.lyricLine[lineNum - 5]
+        console.log('handleScroll', this.handleScroll)
+        this.currentLineNum = lineNum
+        if (lineNum > 5) {
+          let lineEl = this.$refs.lyricLine[lineNum - 5]
+          console.log('handleLyricflowwww')
+          if (!this.handleScroll) {
             this.$refs.lyricList.scrollToElement(lineEl, 1000)
-          } else {
-            this.$refs.lyricList.scrollTo(0, 0, 1000)
+            console.log('autoLyric')
           }
+          console.log('handleLyric')
+        } else {
+          this.$refs.lyricList.scrollTo(0, 0, 1000)
         }
         this.playingLyric = txt
       },
@@ -490,6 +517,15 @@
         this.$nextTick(() => {
           newPlaying ? audio.play() : audio.pause()
         })
+      },
+      changePos(newPos, oldPos) {
+        let difference = Math.abs(newPos - oldPos)
+        if (difference > 32) {
+          this.autoPos = Math.random()
+          console.log('newPos', newPos)
+          console.log('oldPos', oldPos)
+          this.handleScroll = true
+        }
       }
     },
     components: {
@@ -533,6 +569,7 @@
           width: 375px
           height: 25px
           top: 36.5%
+          z-index: 88
           .playHr
             width: 30px
             height: 25px
@@ -634,6 +671,8 @@
               font-size: $font-size-medium
               &.current
                 color: $color-background-header-buttom
+              &.current-sub
+                color: rgba(255, 255, 255, 0.5)
       .bottom
         position: absolute
         bottom: 50px
