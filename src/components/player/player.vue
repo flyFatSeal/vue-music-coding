@@ -16,7 +16,7 @@
           </div>
           <h1 class="title" v-html="currentSong.name"></h1>
           <h2 class="subtitle" v-html="currentSong.singer"></h2>
-          <div class="brLyric" v-show="handleScroll" ref="brLyric">  
+          <div class="brLyric" v-show="handleScroll && (currentShow === 'lyric')" ref="brLyric">  
             <div class="playHr" @click.stop="playSubTime">
               <img src="./play.png" height="100%" width="100%">
             </div>
@@ -409,7 +409,6 @@
             this.$refs.lyricList.scrollToElement(lineEl, 1000)
             console.log('autoLyric')
           }
-          console.log('handleLyric')
         } else {
           this.$refs.lyricList.scrollTo(0, 0, 1000)
         }
@@ -520,10 +519,8 @@
       },
       changePos(newPos, oldPos) {
         let difference = Math.abs(newPos - oldPos)
-        if (difference > 32) {
+        if ((difference > 32) && (this.currentLineNum > 5)) {
           this.autoPos = Math.random()
-          console.log('newPos', newPos)
-          console.log('oldPos', oldPos)
           this.handleScroll = true
         }
       }
